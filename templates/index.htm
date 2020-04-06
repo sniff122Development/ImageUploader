@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Lewis' File Uploader</title>
+
+    <meta authour="sniff122/Lewis">
+    <meta description="A file uploader developed by sniff122/Lewis">
+    <meta property="og:title" content="ImageUploader">
+    <meta property="og:url" content="http://i.sniff122.ga">
+    <meta property="og:locale" content="en_UK">
+    <meta property="og:type" content="website">
+    <meta property="twitter:title" content="ImageUploader">
+    <meta property="twitter:creator" content="@sniff122">
+    <meta property="twitter:description" content="A file uploader developed by sniff122/Lewis">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    
+    <style>
+        .alert {
+            padding: 20px;
+            background-color: white;
+            color: black;
+        }
+
+        .maincontent {
+            position:fixed;
+            top:0;
+            bottom:0;
+            left:0;
+            right:0;
+            width:540px;
+            height:300px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body style="background-color: black; color: white">
+    
+    <script>
+        function request() {
+            var msgbar = document.getElementById("messagebar");
+            var alertdiv = document.createElement("div");
+            alertdiv.classList.add("alert");
+            alertdiv.classList.add("alert-info");
+            var par = document.createElement("p");
+            par.innerHTML = "<strong>Please Wait!</strong> Uploading your file"
+            alertdiv.appendChild(par);
+            msgbar.appendChild(alertdiv);
+
+            var form = document.getElementById("upload-form");
+            var apikey = document.getElementById("Authorization").value;
+            const apiendpoint = "{{uploadapi}}"
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", apiendpoint);
+            xhr.setRequestHeader("Auth", apikey);
+            var data = new FormData(form);
+            xhr.onload = function () {
+                var resp = JSON.parse(this.responseText);
+                $(".alert").alert('close');
+                if (resp["Status"] == 200){
+                    var uploadurl = resp["FileLink"]
+                    var msgbar = document.getElementById("messagebar");
+                    var alertdiv = document.createElement("div");
+                    alertdiv.classList.add("alert");
+                    alertdiv.classList.add("alert-info");
+                    var par = document.createElement("p");
+                    par.innerHTML = "<strong>Done!</strong> Redirecting you to the file link"
+                    alertdiv.appendChild(par);
+                    msgbar.appendChild(alertdiv);
+                    setTimeout(function () { document.location.replace(uploadurl); }, 2000);
+                } else {
+                    var msgbar = document.getElementById("messagebar");
+                    var alertdiv = document.createElement("div");
+                    alertdiv.classList.add("alert");
+                    alertdiv.classList.add("alert-danger");
+                    var par = document.createElement("p");
+                    par.innerHTML = "<strong>Error!</strong> The server replied with response code " + resp["Status"] + ", " + resp["Message"]
+                    alertdiv.appendChild(par);
+                    msgbar.appendChild(alertdiv);
+                    setTimeout(function () { $(".alert").alert('close'); }, 5000);
+                }
+            }
+            xhr.send(data);
+        }
+    </script>
+    
+    <center>
+        <div id="messagebar">
+
+        </div>
+        <div id="content" class="maincontent">
+            <h1>Lewis' File Uploader</h1>
+            <br />
+            <form enctype="multipart/form-data" action="" method="post" id="upload-form">
+                <label>API Key:</label>
+                <input type="text" name="Authorization" id="Authorization">
+                <br />
+                <input type="file" id="file" name="file">
+            </form>
+            <button onclick="request()">Upload</button>
+        </div>
+    </center>
+</body>
+</html>

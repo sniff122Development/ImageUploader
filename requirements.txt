@@ -1,0 +1,8 @@
+discord
+flask
+gevent
+asyncio
+requests
+aiohttp
+yaspin
+Flask-BasicAuth

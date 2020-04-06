@@ -1,0 +1,12 @@
+Config.json
+Config/APIKeys.json
+Config/files.json
+data/uploads/*
+.vscode/sftp.json
+__pycache__/Image_Uploader.cpython-37.pyc
+__pycache__/DiscordObjects.cpython-37.pyc
+__pycache__/APIkeyManagement.cpython-37.pyc
+ImageUploader/ImageUploader.pyproj
+.vs/ImageUploader/config/applicationhost.config
+.vs/ImageUploader/v16/.suo
+.vscode/launch.json
