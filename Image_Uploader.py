@@ -47,11 +47,42 @@ try:
         global apikeys
         apikeys = json.load(f)
 except:
-    pass
+    try:
+        with open(str(CONFIG_DIRECTORY + "/APIKeys.json") , "w") as f:
+            f = "{}"
+            f.close()
+        with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
+            global apikeys
+            apikeys = json.load(f)
+    except:
+        os.mkdir(CONFIG_DIRECTORY)
+        with open(str(CONFIG_DIRECTORY + "/APIKeys.json") , "w") as f:
+            f = "{}"
+            f.close()
+        with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
+            global apikeys
+            apikeys = json.load(f)
 
-with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
-    global files
-    files = json.load(f)
+try:
+    with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
+        global apikeys
+        apikeys = json.load(f)
+except:
+    try:
+        with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
+            f = "{}"
+            f.close()
+        with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
+            global apikeys
+            apikeys = json.load(f)
+    except:
+        os.mkdir(CONFIG_DIRECTORY)
+        with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
+            f = "{}"
+            f.close()
+        with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
+            global apikeys
+            apikeys = json.load(f)
 
 def saveconfigs(keys, filetokens):
     with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "w") as f:
@@ -94,8 +125,8 @@ def upload_file():
     apikey = str(request.headers.get("Auth"))
     if apikeyvalid(str(apikey)):
         if request.files["file"]:
-            file = request.files["file"]
-            filename = file.filename
+            uploadfile = request.files["file"]
+            filename = uploadfile.filename
             filenamesplit = str(filename).split(".")
             ext = str(filenamesplit[len(filenamesplit) - 1])
             filetoken = str(secrets.token_hex(10))
@@ -103,8 +134,11 @@ def upload_file():
                 filetoken = str(secrets.token_hex(10))
             filename = filetoken + "." + ext
             savepath = os.path.join(UPLOAD_DIRECTORY, filename)
-            
-            file.save(savepath)
+            try:
+                uploadfile.save(savepath)
+            except:
+                os.mkdir(UPLOAD_DIRECTORY)
+                uploadfile.save(savepath)
             apikeys[apikey]["file-names"].append(filename)
             files[filename] = apikey
             saveconfigs(apikeys, files)
