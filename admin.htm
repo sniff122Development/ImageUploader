@@ -459,7 +459,7 @@
                             <br />
                             <input type="file" id="file" name="file">
                         </form>
-                        <button class="btn btn-success" onclick="requestUpload()"><span>Upload</span></button>
+                        <button class="btn btn-outline-success" onclick="requestUpload()"><span>Upload</span></button>
                     </td>
                     <td>
                         <form enctype="application/json" action="" method="delete" id="delete-form">
@@ -471,7 +471,7 @@
                             <tabel>File Name</tabel>
                             <input type="text" name="FileNamedel" id="FileNamedel">
                         </form>
-                        <button class="btn btn-danger"onclick="requestDelete()"><span>Delete</span></button>
+                        <button class="btn btn-outline-danger" onclick="requestDelete()"><span>Delete</span></button>
                     </td>
                     <td>
                         <form enctype="application/json" action="" method="put" id="rename-form">
@@ -486,7 +486,7 @@
                             <tabel>New File Name</tabel>
                             <input type="text" name="newFileNameren" id="newFileNameren">
                         </form>
-                        <button onclick="requestRename()"><span>Rename</span></button>
+                        <button class="btn btn-outline-danger" onclick="requestRename()"><span>Rename</span></button>
                     </td>
                 </tr>
                 <tr>
@@ -497,7 +497,7 @@
                             <tabel>Name</tabel>
                             <input type="text" name="apigenname" id="apigenname">
                         </form>
-                        <button class="btn btn-success" onclick="genAPIkey()"><span>Generate Key</span></button>
+                        <button class="btn btn-outline-success" onclick="genAPIkey()"><span>Generate Key</span></button>
                     </td>
                     <td>
                         <form enctype="application/json" action="" method="post" id="apirevoke-form">
