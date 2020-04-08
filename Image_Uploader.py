@@ -44,7 +44,6 @@ CONFIG_DIRECTORY = PROJECT_HOME + "/" +  Config["webserver"]["data_directory"]
 
 try:
     with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-        global apikeys
         apikeys = json.load(f)
 except:
     try:
@@ -52,7 +51,6 @@ except:
             f = "{}"
             f.close()
         with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-            global apikeys
             apikeys = json.load(f)
     except:
         os.mkdir(CONFIG_DIRECTORY)
@@ -60,12 +58,10 @@ except:
             f = "{}"
             f.close()
         with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-            global apikeys
             apikeys = json.load(f)
 
 try:
     with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
-        global apikeys
         apikeys = json.load(f)
 except:
     try:
@@ -73,7 +69,6 @@ except:
             f = "{}"
             f.close()
         with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
-            global apikeys
             apikeys = json.load(f)
     except:
         os.mkdir(CONFIG_DIRECTORY)
@@ -81,7 +76,6 @@ except:
             f = "{}"
             f.close()
         with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-            global apikeys
             apikeys = json.load(f)
 
 def saveconfigs(keys, filetokens):
