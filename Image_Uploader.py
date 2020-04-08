@@ -62,21 +62,21 @@ except:
 
 try:
     with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
-        apikeys = json.load(f)
+        files = json.load(f)
 except:
     try:
         with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
             f = "{}"
             f.close()
         with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
-            apikeys = json.load(f)
+            files = json.load(f)
     except:
         os.mkdir(CONFIG_DIRECTORY)
         with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
             f = "{}"
             f.close()
         with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-            apikeys = json.load(f)
+            files = json.load(f)
 
 def saveconfigs(keys, filetokens):
     with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "w") as f:
