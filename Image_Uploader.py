@@ -143,7 +143,7 @@ def upload_file():
             files[filename] = apikey
             saveconfigs(apikeys, files)
             if Config["bot"]["Enabled"] == "True":
-                embed = DiscordObjects.DiscordEmbed(title="New Image Uploaded", description="There is a new image!", footer=DiscordObjects.EmbedFooter("There be a new image!"), colour=0xffffff, image=DiscordObjects.EmbedImage(str(WEBROOT + "/uploads/" + filename)), author=DiscordObjects.EmbedAuthor("ImageUploader"), fields=[DiscordObjects.EmbedField(name="URL:", value=str(WEBROOT + "/uploads/" + filename), inline=False)], thumbnail=DiscordObjects.EmbedImage(str(WEBROOT + "/uploads/" + filename)))
+                embed = DiscordObjects.DiscordEmbed(title="New Image Uploaded", description="There is a new image!", footer=DiscordObjects.EmbedFooter(""), colour=0xffffff, image=DiscordObjects.EmbedImage(str(WEBROOT + "/uploads/" + filename)), author=DiscordObjects.EmbedAuthor("ImageUploader"), fields=[DiscordObjects.EmbedField(name="URL:", value=str(WEBROOT + "/uploads/" + filename), inline=False)], thumbnail=DiscordObjects.EmbedImage(str(WEBROOT + "/uploads/" + filename)))
                 webhookcontent = DiscordObjects.DiscordWebhookContent(username="ImageUploader", avatar_url=Config["bot"]["webhook"]["avatar_url"], tts=False, embed=[embed])
                 DiscordObjects.WebhookPost(Config["bot"]["webhook"]["url"], webhookcontent)
             global RecentFile
