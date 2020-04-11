@@ -60,23 +60,22 @@ except:
         with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
             apikeys = json.load(f)
 
-try:
+if os.path.exists(str(CONFIG_DIRECTORY + "/files.json")):
     with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
         files = json.load(f)
-except:
-    try:
-        with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
+elif os.path.exists(str(CONFIG_DIRECTORY)):
+    with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
             f = "{}"
             f.close()
-        with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
-            files = json.load(f)
-    except:
-        os.mkdir(CONFIG_DIRECTORY)
-        with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
-            f = "{}"
-            f.close()
-        with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-            files = json.load(f)
+    with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
+        files = json.load(f)
+else:
+    os.mkdir(CONFIG_DIRECTORY)
+    with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
+        f = "{}"
+        f.close()
+    with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
+        files = json.load(f)
 
 def saveconfigs(keys, filetokens):
     with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "w") as f:
