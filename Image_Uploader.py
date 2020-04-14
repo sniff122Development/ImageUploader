@@ -45,15 +45,15 @@ CONFIG_DIRECTORY = PROJECT_HOME + "/" +  Config["webserver"]["data_directory"]
 if not os.path.exists(str(CONFIG_DIRECTORY)):
     os.mkdir(CONFIG_DIRECTORY)
 
-if os.path.exists(str(CONFIG_DIRECTORY + "/files.json")):
-    with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
-        files = json.load(f)
+if os.path.exists(str(CONFIG_DIRECTORY + "/APIKeys.json")):
+    with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
+        apikeys = json.load(f)
 else:
-    with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
+    with open(str(CONFIG_DIRECTORY + "/APIKeys.json") , "w") as f:
             f.write("{}")
             f.close()
-    with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
-        files = json.load(f)
+    with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
+        apikeys = json.load(f)
 
 if os.path.exists(str(CONFIG_DIRECTORY + "/files.json")):
     with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
