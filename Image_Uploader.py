@@ -30,7 +30,7 @@ print("""
      Developed by 
     Lewis L. Foster
        sniff122
-       V: 1.0.0  
+       V: 1.1.0  
 =======================
 
 """)
@@ -42,47 +42,28 @@ PROJECT_HOME = os.path.dirname(os.path.realpath(__file__))
 UPLOAD_DIRECTORY = PROJECT_HOME + "/" + Config["webserver"]["upload_directory"]
 CONFIG_DIRECTORY = PROJECT_HOME + "/" +  Config["webserver"]["data_directory"]
 
-try:
-    with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-        global apikeys
-        apikeys = json.load(f)
-except:
-    try:
-        with open(str(CONFIG_DIRECTORY + "/APIKeys.json") , "w") as f:
-            f = "{}"
-            f.close()
-        with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-            global apikeys
-            apikeys = json.load(f)
-    except:
-        os.mkdir(CONFIG_DIRECTORY)
-        with open(str(CONFIG_DIRECTORY + "/APIKeys.json") , "w") as f:
-            f = "{}"
-            f.close()
-        with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-            global apikeys
-            apikeys = json.load(f)
+if not os.path.exists(str(CONFIG_DIRECTORY)):
+    os.mkdir(CONFIG_DIRECTORY)
 
-try:
-    with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
-        global apikeys
+if os.path.exists(str(CONFIG_DIRECTORY + "/APIKeys.json")):
+    with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
         apikeys = json.load(f)
-except:
-    try:
-        with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
-            f = "{}"
+else:
+    with open(str(CONFIG_DIRECTORY + "/APIKeys.json") , "w") as f:
+            f.write("{}")
             f.close()
-        with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
-            global apikeys
-            apikeys = json.load(f)
-    except:
-        os.mkdir(CONFIG_DIRECTORY)
-        with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
-            f = "{}"
+    with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
+        apikeys = json.load(f)
+
+if os.path.exists(str(CONFIG_DIRECTORY + "/files.json")):
+    with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
+        files = json.load(f)
+else:
+    with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
+            f.write("{}")
             f.close()
-        with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-            global apikeys
-            apikeys = json.load(f)
+    with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
+        files = json.load(f)
 
 def saveconfigs(keys, filetokens):
     with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "w") as f:
@@ -143,7 +124,7 @@ def upload_file():
             files[filename] = apikey
             saveconfigs(apikeys, files)
             if Config["bot"]["Enabled"] == "True":
-                embed = DiscordObjects.DiscordEmbed(title="New Image Uploaded", description="There is a new image!", footer=DiscordObjects.EmbedFooter("There be a new image!"), colour=0xffffff, image=DiscordObjects.EmbedImage(str(WEBROOT + "/uploads/" + filename)), author=DiscordObjects.EmbedAuthor("ImageUploader"), fields=[DiscordObjects.EmbedField(name="URL:", value=str(WEBROOT + "/uploads/" + filename), inline=False)], thumbnail=DiscordObjects.EmbedImage(str(WEBROOT + "/uploads/" + filename)))
+                embed = DiscordObjects.DiscordEmbed(title="New Image Uploaded", description="There is a new image!", footer=DiscordObjects.EmbedFooter(""), colour=0xffffff, image=DiscordObjects.EmbedImage(str(WEBROOT + "/uploads/" + filename)), author=DiscordObjects.EmbedAuthor("ImageUploader"), fields=[DiscordObjects.EmbedField(name="URL:", value=str(WEBROOT + "/uploads/" + filename), inline=False)], thumbnail=DiscordObjects.EmbedImage(str(WEBROOT + "/uploads/" + filename)))
                 webhookcontent = DiscordObjects.DiscordWebhookContent(username="ImageUploader", avatar_url=Config["bot"]["webhook"]["avatar_url"], tts=False, embed=[embed])
                 DiscordObjects.WebhookPost(Config["bot"]["webhook"]["url"], webhookcontent)
             global RecentFile

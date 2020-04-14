@@ -1,6 +1,3 @@
-Config.json
-Config/APIKeys.json
-Config/files.json
 data/uploads/*
 .vscode/sftp.json
 __pycache__/Image_Uploader.cpython-37.pyc

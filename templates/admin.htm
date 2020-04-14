@@ -19,7 +19,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-    
     <style>
         .alert {
             padding: 20px;
@@ -444,7 +443,7 @@
             <label>Password:</label>
             <input type="password" name="password" id="password">
             <br />
-            <a href="{{webroot}}/{{recentfile}}">Most Recent File ({{webroot}}/{{recentfile}})</a>
+            <a href="{{recentfile}}">Most Recent File ({{recentfile}})</a>
             <br /><br />
             <table>
                 <tr>
@@ -460,7 +459,7 @@
                             <br />
                             <input type="file" id="file" name="file">
                         </form>
-                        <button onclick="requestUpload()">Upload</button>
+                        <button class="btn btn-outline-success" onclick="requestUpload()"><span>Upload</span></button>
                     </td>
                     <td>
                         <form enctype="application/json" action="" method="delete" id="delete-form">
@@ -472,7 +471,7 @@
                             <tabel>File Name</tabel>
                             <input type="text" name="FileNamedel" id="FileNamedel">
                         </form>
-                        <button onclick="requestDelete()">Delete</button>
+                        <button class="btn btn-outline-danger" onclick="requestDelete()"><span>Delete</span></button>
                     </td>
                     <td>
                         <form enctype="application/json" action="" method="put" id="rename-form">
@@ -487,7 +486,7 @@
                             <tabel>New File Name</tabel>
                             <input type="text" name="newFileNameren" id="newFileNameren">
                         </form>
-                        <button onclick="requestRename()">Rename</button>
+                        <button class="btn btn-outline-danger" onclick="requestRename()"><span>Rename</span></button>
                     </td>
                 </tr>
                 <tr>
@@ -498,7 +497,7 @@
                             <tabel>Name</tabel>
                             <input type="text" name="apigenname" id="apigenname">
                         </form>
-                        <button onclick="genAPIkey()">Generate Key</button>
+                        <button class="btn btn-outline-success" onclick="genAPIkey()"><span>Generate Key</span></button>
                     </td>
                     <td>
                         <form enctype="application/json" action="" method="post" id="apirevoke-form">
@@ -507,11 +506,11 @@
                             <tabel>API Key</tabel>
                             <input type="text" name="apiremokekey" id="apirevokekey">
                         </form>
-                        <button onclick="revokeAPIkey()">Revoke Key</button>
+                        <button onclick="revokeAPIkey()"><span>Revoke Key</span></button>
                     </td>
                 </tr>
         </table>
-        <button onclick="loadFiles()">Load Files</button>
+        <button class="btn btn-success" onclick="loadFiles()"><span>Load Files</span></button>
         <label for="files">Files</label>
         <select id="files" onchange="fillInfo()">
             <option value=""></option>
