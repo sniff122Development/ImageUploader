@@ -42,39 +42,27 @@ PROJECT_HOME = os.path.dirname(os.path.realpath(__file__))
 UPLOAD_DIRECTORY = PROJECT_HOME + "/" + Config["webserver"]["upload_directory"]
 CONFIG_DIRECTORY = PROJECT_HOME + "/" +  Config["webserver"]["data_directory"]
 
-try:
-    with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-        apikeys = json.load(f)
-except:
-    try:
-        with open(str(CONFIG_DIRECTORY + "/APIKeys.json") , "w") as f:
-            f = "{}"
-            f.close()
-        with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-            apikeys = json.load(f)
-    except:
-        os.mkdir(CONFIG_DIRECTORY)
-        with open(str(CONFIG_DIRECTORY + "/APIKeys.json") , "w") as f:
-            f = "{}"
-            f.close()
-        with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
-            apikeys = json.load(f)
+if not os.path.exists(str(CONFIG_DIRECTORY)):
+    os.mkdir(CONFIG_DIRECTORY)
 
 if os.path.exists(str(CONFIG_DIRECTORY + "/files.json")):
     with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
         files = json.load(f)
-elif os.path.exists(str(CONFIG_DIRECTORY)):
+else:
     with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
-            f = "{}"
+            f.write("{}")
             f.close()
     with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
         files = json.load(f)
+
+if os.path.exists(str(CONFIG_DIRECTORY + "/files.json")):
+    with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
+        files = json.load(f)
 else:
-    os.mkdir(CONFIG_DIRECTORY)
     with open(str(CONFIG_DIRECTORY + "/files.json") , "w") as f:
-        f = "{}"
-        f.close()
-    with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "r") as f:
+            f.write("{}")
+            f.close()
+    with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
         files = json.load(f)
 
 def saveconfigs(keys, filetokens):
