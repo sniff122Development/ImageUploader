@@ -1,5 +1,9 @@
 data/uploads/*
+Config.json
+Config/*
+Config/
 .vscode/sftp.json
+.vscode
 __pycache__/Image_Uploader.cpython-37.pyc
 __pycache__/DiscordObjects.cpython-37.pyc
 __pycache__/APIkeyManagement.cpython-37.pyc
