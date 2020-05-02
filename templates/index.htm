@@ -87,6 +87,67 @@
             }
             xhr.send(data);
         }
+
+        function shortLink() {
+            var msgbar = document.getElementById("messagebar");
+            var alertdiv = document.createElement("div");
+            alertdiv.classList.add("alert");
+            alertdiv.classList.add("alert-info");
+            var par = document.createElement("p");
+            par.innerHTML = "<strong>Please Wait!</strong> Shortening your link"
+            alertdiv.appendChild(par);
+            msgbar.appendChild(alertdiv);
+
+            var apikey = document.getElementById("Authorization").value;
+            var longlink = document.getElementById("linkurl").value;
+            const apiendpoint = "{{linkshortapi}}"
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", apiendpoint);
+            xhr.setRequestHeader("Auth", apikey);
+            xhr.setRequestHeader('url', longlink)
+            xhr.onload = function () {
+                var resp = JSON.parse(this.responseText);
+                if (resp["Status"] == 401) {
+                    $(".alert").alert('close');
+                    var msgbar = document.getElementById("messagebar");
+                    var alertdiv = document.createElement("div");
+                    alertdiv.classList.add("alert");
+                    alertdiv.classList.add("alert-danger");
+                    var par = document.createElement("p");
+                    par.innerHTML = "<strong>Unauthorized!</strong> You are not authorized to do that!"
+                    alertdiv.appendChild(par);
+                    msgbar.appendChild(alertdiv);
+                    setTimeout(function () { $(".alert").alert('close'); }, 5000);
+                } else if (resp["Status"] == 200) {
+                    var shorturl = resp["shorturl"]
+
+                    $(".alert").alert('close');
+
+                    var msgbar = document.getElementById("messagebar");
+                    var alertdiv = document.createElement("div");
+                    alertdiv.classList.add("alert");
+                    alertdiv.classList.add("alert-info");
+                    var par = document.createElement("p");
+                    par.innerHTML = "<strong>Done!</strong> Short Link: <a href='" + shorturl + "'>" + shorturl + "</a>"
+                    alertdiv.appendChild(par);
+                    msgbar.appendChild(alertdiv);
+                    setTimeout(function () { $(".alert").alert('close'); }, 10000);
+                } else {
+                    $(".alert").alert('close');
+
+                    var msgbar = document.getElementById("messagebar");
+                    var alertdiv = document.createElement("div");
+                    alertdiv.classList.add("alert");
+                    alertdiv.classList.add("alert-danger");
+                    var par = document.createElement("p");
+                    par.innerHTML = "<strong>Warning!</strong> An error occured, got code " + resp["Status"] + " from server! " + resp["Message"]
+                    alertdiv.appendChild(par);
+                    msgbar.appendChild(alertdiv);
+                    setTimeout(function () { $(".alert").alert('close'); }, 5000);
+                }
+            }
+            xhr.send();
+        }
     </script>
     
     <center>
@@ -99,10 +160,19 @@
             <form enctype="multipart/form-data" action="" method="post" id="upload-form">
                 <label>API Key:</label>
                 <input type="text" name="Authorization" id="Authorization">
-                <br />
+                <br><br>
                 <input type="file" id="file" name="file">
+                <br>
             </form>
             <button class="btn btn-outline-success" onclick="request()">Upload</button>
+            <br>
+            <br>
+            <form enctype="applicaton/json" action="" method="POST" id="linkshort-form">
+                <label>Long URL</label>
+                <input type="text" name="linkurl" id="linkurl">
+                <br>
+            </form>
+            <button class="btn btn-outline-success" onclick="shortLink()">Shorten Link</button>
         </div>
     </center>
 </body>

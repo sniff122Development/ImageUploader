@@ -6,7 +6,8 @@ def genkey(name, apikeys):
         newkey = secrets.token_hex(30)
     apikeys[newkey] = {
         "name": name,
-        "file-names": []
+        "file-names": [],
+        "short-urls": []
     }
     return {"apikeys": apikeys, "newkey": newkey}
 
