@@ -16,6 +16,8 @@ try:
     from flask_basicauth import BasicAuth
     import DiscordObjects
     import APIkeyManagement
+    import shutil
+    import urllib
 except ImportError as e:
     print(u"\u001b[31mFailed to import module: '" + e.name + "'. Please make sure all dependencies that are in 'requirements.txt' are installed and try again.\u001b[0m")
     exit()
@@ -30,13 +32,24 @@ print("""
      Developed by 
     Lewis L. Foster
        sniff122
-       V: 1.1.0  
+       V: 2.0.0  
 =======================
 
 """)
 
-with open("Config.json") as f:
-    Config = json.load(f)
+try:
+    with open("Config.json") as f:
+        Config = json.load(f)
+except FileNotFoundError:
+    print(u"\u001b[31mThe 'Config.json' file was not found, copying file from 'Config.example.json'\u001b[0m")
+    try:
+        shutil.copyfile(r"Config.example.json", r"Config.json")
+    except:
+        print(u"\u001b[31mThe 'Config.example.json' file was not found, downloading from GitHub\u001b[0m")
+        urllib.request.urlretrieve("https://raw.githubusercontent.com/sniff122Development/ImageUploader/master/Config.example.json", "Config.json")
+    print(u"\u001b[31mDone! Exiting application, please edit 'Config.json' and restart. If you need assistance, please see https://github.com/sniff122Development/ImageUploader/wiki\u001b[0m")
+    exit()
+    
 
 PROJECT_HOME = os.path.dirname(os.path.realpath(__file__))
 UPLOAD_DIRECTORY = PROJECT_HOME + "/" + Config["webserver"]["upload_directory"]
@@ -65,11 +78,23 @@ else:
     with open(str(CONFIG_DIRECTORY + "/files.json"), "r") as f:
         files = json.load(f)
 
-def saveconfigs(keys, filetokens):
+if os.path.exists(str(CONFIG_DIRECTORY + "/shortlinks.json")):
+    with open(str(CONFIG_DIRECTORY + "/shortlinks.json"), "r") as f:
+        shortlinks = json.load(f)
+else:
+    with open(str(CONFIG_DIRECTORY + "/shortlinks.json") , "w") as f:
+            f.write("{}")
+            f.close()
+    with open(str(CONFIG_DIRECTORY + "/shortlinks.json"), "r") as f:
+        shortlinks = json.load(f)
+
+def saveconfigs(keys, filetokens, shortlinks):
     with open(str(CONFIG_DIRECTORY + "/APIKeys.json"), "w") as f:
         json.dump(keys, f, indent=4)
     with open(str(CONFIG_DIRECTORY + "/files.json"), "w") as f:
         json.dump(filetokens, f, indent=4)
+    with open(str(CONFIG_DIRECTORY + "/shortlinks.json"), "w") as f:
+        json.dump(shortlinks, f, indent=4)
 
 #=============================
 #==========WEBSERVER==========
@@ -92,14 +117,22 @@ def apikeyvalid(key):
         return False
 
 def checkiffileexists(filename):
-    if filename in files:
+    if filename in shortlinks:
         return True
     else:
         return False
 
 @app.route("/", methods=['GET'])
 def web_root():
-    return render_template("index.htm", uploadapi=str(WEBROOT + "/api/upload"), webroot=str(WEBROOT))
+    return render_template("index.htm", uploadapi=str(WEBROOT + "/api/upload"), linkshortapi=str(WEBROOT + "/api/url"), webroot=str(WEBROOT))
+
+@app.route("/js/<jstype>", methods=["GET"])
+def return_js(jstype):
+    if jstype in ["admin_files.js", "admin_keys.js", "admin_links.js"]:
+        return send_from_directory("JS", jstype)
+    else:
+        return jsonify({"Status": 404, "Message": "Not Found"})
+
 
 @app.route("/api/upload", methods=["POST"])
 def upload_file():
@@ -122,7 +155,7 @@ def upload_file():
                 uploadfile.save(savepath)
             apikeys[apikey]["file-names"].append(filename)
             files[filename] = apikey
-            saveconfigs(apikeys, files)
+            saveconfigs(apikeys, files, shortlinks)
             if Config["bot"]["Enabled"] == "True":
                 embed = DiscordObjects.DiscordEmbed(title="New Image Uploaded", description="There is a new image!", footer=DiscordObjects.EmbedFooter(""), colour=0xffffff, image=DiscordObjects.EmbedImage(str(WEBROOT + "/uploads/" + filename)), author=DiscordObjects.EmbedAuthor("ImageUploader"), fields=[DiscordObjects.EmbedField(name="URL:", value=str(WEBROOT + "/uploads/" + filename), inline=False)], thumbnail=DiscordObjects.EmbedImage(str(WEBROOT + "/uploads/" + filename)))
                 webhookcontent = DiscordObjects.DiscordWebhookContent(username="ImageUploader", avatar_url=Config["bot"]["webhook"]["avatar_url"], tts=False, embed=[embed])
@@ -132,6 +165,35 @@ def upload_file():
             return jsonify({"Status": 200, "Message": "OK", "FileLink": str(WEBROOT + "/uploads/" + filename)})
         else:
             return jsonify({"Status": 403, "Message": "Forbidden - No file provided"})
+    else:
+        return jsonify({"Status": 401, "Message": "Unauthorized"})
+
+@app.route("/api/url", methods=["POST"])
+def shorten_link():
+    apikey = str(request.headers.get("Auth"))
+    if apikeyvalid(apikey):
+        url = str(request.headers.get("url"))
+        if url:
+            exists = False
+            for urlid in shortlinks:
+                if url == shortlinks[urlid]:
+                    exists = True
+                    break
+                else:
+                    continue
+            if not exists:
+                urlid = str(secrets.token_hex(4))
+                while urlid in shortlinks:
+                    urlid = str(secrets.token_hex(4))
+                try:
+                    apikeys[apikey]["short-urls"].append(urlid)
+                except:
+                    apikeys[apikey]["short-urls"] = [urlid]
+                shortlinks[urlid] = {"url": url, "key": apikey}
+                saveconfigs(apikeys, files, shortlinks)
+            return jsonify({"Status": 200, "Message": "OK", "shorturl": str(WEBROOT + "/link/" + urlid)})
+        else:
+            return jsonify({"Status": 403, "Message": "Forbidden - No url provided"})
     else:
         return jsonify({"Status": 401, "Message": "Unauthorized"})
 
@@ -146,14 +208,26 @@ def get_file(file):
     except:
         return jsonify({"Status": 500, "Message": "Internal Server Error"})
 
+@app.route("/link/<link>", methods=["GET"])
+def get_link(link):
+    try:
+        if link in shortlinks:
+            return redirect(shortlinks[link]["url"])
+        else:
+            return jsonify({"Status": 404, "Message": "Not Found"})
+    except:
+        return jsonify({"Status": 500, "Message": "Internal Server Error"})
+
 #==WEBSERVER=ADMIN==
 
 @app.route("/admin", methods=['GET'])
 @basic_auth.required
 def admin_root():
-    return render_template("admin.htm", webroot=WEBROOT, uploadapi=str(WEBROOT + "/api/admin/upload"), deleteapi=str(WEBROOT + "/api/admin/delete"), renameapi=str(WEBROOT + "/api/admin/rename"), filelistapi=str(WEBROOT + "/api/admin/files"), apigenkey=str(WEBROOT + "/api/admin/newkey"), apirevokeapi=str(WEBROOT + "/api/admin/revokekey"), recentfile=RecentFile)
+    return render_template("admin.htm", 
+        webroot=WEBROOT,
+        recentfile=RecentFile)
 
-@app.route("/api/admin/files", methods=["GET"])
+@app.route("/api/admin/listfiles", methods=["GET"])
 def admin_get_files():
     username = str(request.headers.get("username"))
     password = str(request.headers.get("password"))
@@ -165,7 +239,19 @@ def admin_get_files():
     else:
         return jsonify({"Status": 401, "Message": "Unauthorized"})
 
-@app.route("/api/admin/upload", methods=["POST"])
+@app.route("/api/admin/listlinks", methods=["GET"])
+def admin_get_links():
+    username = str(request.headers.get("username"))
+    password = str(request.headers.get("password"))
+    if (username == Config["webserver"]["admin_auth"]["username"]) and (password == Config["webserver"]["admin_auth"]["password"]):
+        linklist = []
+        for linkid in shortlinks:
+            linklist.append(linkid)
+        return jsonify({"Status": 200, "Message": "Ok", "links": linklist})
+    else:
+        return jsonify({"Status": 401, "Message": "Unauthorized"})
+
+@app.route("/api/admin/uploadfile", methods=["POST"])
 def admin_upload_file():
     apikey = str(request.headers.get("Auth"))
     username = str(request.headers.get("username"))
@@ -178,7 +264,7 @@ def admin_upload_file():
             file.save(savepath)
             apikeys[apikey]["file-names"].append(filename)
             files[filename] = apikey
-            saveconfigs(apikeys, files)
+            saveconfigs(apikeys, files, shortlinks)
             if Config["bot"]["Enabled"] == "True":
                 embed = DiscordObjects.DiscordEmbed(title="New Image Uploaded", description="There is a new image!", footer=DiscordObjects.EmbedFooter("There be a new image!"), colour=0xffffff, image=DiscordObjects.EmbedImage(str(WEBROOT + "/uploads/" + filename)), author=DiscordObjects.EmbedAuthor("ImageUploader"), fields=[DiscordObjects.EmbedField(name="URL:", value=str(WEBROOT + "/uploads/" + filename), inline=False)], thumbnail=DiscordObjects.EmbedImage(str(WEBROOT + "/uploads/" + filename)))
                 webhookcontent = DiscordObjects.DiscordWebhookContent(username="ImageUploader", avatar_url=Config["bot"]["webhook"]["avatar_url"], tts=False, embed=[embed])
@@ -191,7 +277,31 @@ def admin_upload_file():
     else:
         return jsonify({"Status": 401, "Message": "Unauthorized"})
 
-@app.route("/api/admin/delete", methods=["DELETE"])
+@app.route("/api/admin/url", methods=["POST"])
+def admin_new_url():
+    apikey = str(request.headers.get("Auth"))
+    username = str(request.headers.get("username"))
+    password = str(request.headers.get("password"))
+    if (username == Config["webserver"]["admin_auth"]["username"]) and (password == Config["webserver"]["admin_auth"]["password"]) and apikeyvalid(str(apikey)):
+        url = str(request.headers.get("url"))
+        if url:
+            try:
+                index = apikeys[apikey]["short-urls"].index(request.headers.get("id"))
+                return jsonify({"Status": 403, "Message": "Forbidden - Link ID already exists"})
+            except:
+                try:
+                    apikeys[apikey]["short-urls"].append(request.headers.get("id"))
+                except:
+                    apikeys[apikey]["short-urls"] = [request.headers.get("id")]
+                shortlinks[request.headers.get("id")] = {"url": url, "key": apikey}
+                saveconfigs(apikeys, files, shortlinks)
+                return jsonify({"Status": 200, "Message": "OK", "shorturl": str(WEBROOT + "/link/" + request.headers.get("id"))})
+        else:
+            return jsonify({"Status": 403, "Message": "Forbidden - No url provided"})
+    else:
+        return jsonify({"Status": 401, "Message": "Unauthorized"})
+
+@app.route("/api/admin/deletefile", methods=["DELETE"])
 def admin_delete_file():
     apikey = str(request.headers.get("Auth"))
     username = str(request.headers.get("username"))
@@ -207,14 +317,35 @@ def admin_delete_file():
 
             fileindex = apikeys[apikey]["file-names"].index(filename)
             del apikeys[apikey]["file-names"][fileindex]
-            saveconfigs(apikeys, files)
+            saveconfigs(apikeys, files, shortlinks)
             return jsonify({"Status": 200, "Message": "OK"})
         except FileNotFoundError:
             return jsonify({"Status": 404, "Message": "Not Found"})
     else:
         return jsonify({"Status": 401, "Message": "Unauthorized"})
 
-@app.route("/api/admin/rename", methods=["PUT"])
+@app.route("/api/admin/deletelink", methods=["DELETE"])
+def admin_delete_link():
+    apikey = str(request.headers.get("Auth"))
+    username = str(request.headers.get("username"))
+    password = str(request.headers.get("password"))
+    lid = str(request.headers.get("id"))
+    if (username == Config["webserver"]["admin_auth"]["username"]) and (password == Config["webserver"]["admin_auth"]["password"]) and apikeyvalid(str(apikey)):
+        try:
+
+            apikey = shortlinks[lid]["key"]
+            del shortlinks[lid]
+
+            linkindex = apikeys[apikey]["short-urls"].index(lid)
+            del apikeys[apikey]["short-urls"][linkindex]
+            saveconfigs(apikeys, files, shortlinks)
+            return jsonify({"Status": 200, "Message": "OK"})
+        except KeyError:
+            return jsonify({"Status": 404, "Message": "Not Found"})
+    else:
+        return jsonify({"Status": 401, "Message": "Unauthorized"})
+
+@app.route("/api/admin/renamefile", methods=["PUT"])
 def admin_rename_file():
     apikey = str(request.headers.get("Auth"))
     username = str(request.headers.get("username"))
@@ -234,9 +365,33 @@ def admin_rename_file():
             fileindex = apikeys[apikey]["file-names"].index(oldfilename)
             del apikeys[apikey]["file-names"][fileindex]
             apikeys[apikey]["file-names"].append(newfilename)
-            saveconfigs(apikeys, files)
+            saveconfigs(apikeys, files, shortlinks) 
             return jsonify({"Status": 200, "Message": "OK", "NewLink": f"{WEBROOT}/uploads/{newfilename}"})
         except FileNotFoundError:
+            return jsonify({"Status": 404, "Message": "Not Found"})
+    else:
+        return jsonify({"Status": 401, "Message": "Unauthorized"})
+
+@app.route("/api/admin/renamelink", methods=["PUT"])
+def admin_rename_link():
+    apikey = str(request.headers.get("Auth"))
+    username = str(request.headers.get("username"))
+    password = str(request.headers.get("password"))
+    oldid = str(request.headers.get("oldid"))
+    newid = str(request.headers.get("newid"))
+    if (username == Config["webserver"]["admin_auth"]["username"]) and (password == Config["webserver"]["admin_auth"]["password"]) and apikeyvalid(str(apikey)):
+        try:
+            oldobj = shortlinks[oldid]
+            del shortlinks[oldid]
+            shortlinks[newid] = oldobj
+
+            fileindex = apikeys[apikey]["short-urls"].index(oldid)
+            apikeys[apikey]["short-urls"].pop(fileindex)
+            apikeys[apikey]["short-urls"].append(newid)
+            saveconfigs(apikeys, shortlinks, shortlinks) 
+            return jsonify({"Status": 200, "Message": "OK", "NewLink": f"{WEBROOT}/uploads/{newid}"})
+        except Exception as e:
+            print(e)
             return jsonify({"Status": 404, "Message": "Not Found"})
     else:
         return jsonify({"Status": 401, "Message": "Unauthorized"})
@@ -251,9 +406,10 @@ def admin_new_key():
             changes = APIkeyManagement.genkey(name, apikeys)
             apikeys.update(changes["apikeys"])
             newkey = changes["newkey"]
-            saveconfigs(apikeys, files)
+            saveconfigs(apikeys, shortlinks, shortlinks) 
             return jsonify({"Status": 200, "Message": "OK", "newkey": newkey})
-        except:
+        except Exception as e:
+            print(e)
             return jsonify({"Status": 500, "Message": "Internal Server Error"})
     else:
         return jsonify({"Status": 401, "Message": "Unauthorized"})
@@ -267,7 +423,7 @@ def admin_revoke_key():
         try:
             changes = APIkeyManagement.revokekey(key, apikeys)
             apikeys.update(changes)
-            saveconfigs(apikeys, files)
+            saveconfigs(apikeys, shortlinks, shortlinks) 
             return jsonify({"Status": 200, "Message": "OK"})
         except:
             return jsonify({"Status": 500, "Message": "Internal Server Error"})
@@ -281,6 +437,7 @@ def flask_thread():
         app.run(host=listen_address, port=port)
     except:
         print(u"\u001b[31mFailed to start webserver. Make sure you are authorized to listen to port " + str(port) + " on " + str(listen_address) + " and try rerunning the application.\u001b[0m")
+        raise
 
 x = threading.Thread(target=flask_thread)
 x.start()
@@ -345,14 +502,14 @@ async def __rename_file__(ctx, currentfile: str, newfile: str):
         newpath = os.path.join("data", "uploads", newfile)
         os.rename(oldpath, newpath)
 
-        apikey = files[currentfile]
-        del files[currentfile]
-        files[newfile] = apikey
+        apikey = shortlinks[currentfile]
+        del shortlinks[currentfile]
+        shortlinks[newfile] = apikey
 
         fileindex = apikeys[apikey]["file-names"].index(currentfile)
         del apikeys[apikey]["file-names"][fileindex]
         apikeys[apikey]["file-names"].append(newfile)
-        saveconfigs(apikeys, files)
+        saveconfigs(apikeys, shortlinks, shortlinks) 
 
         embed = discord.Embed(title="The file was renamed", colour=0x00ff00)
         embed.add_field(name=f"{WEBROOT}/uploads/{currentfile}", value=f"{WEBROOT}/uploads/{newfile}")
@@ -371,8 +528,8 @@ async def __delete_file__(ctx, deletefile: str):
         oldpath = os.path.join("data", "uploads", deletefile)
         os.remove(oldpath)
 
-        apikey = files[deletefile]
-        del files[deletefile]
+        apikey = shortlinks[deletefile]
+        del shortlinks[deletefile]
 
         fileindex = apikeys[apikey]["file-names"].index(deletefile)
         del apikeys[apikey]["file-names"][fileindex]
@@ -392,7 +549,7 @@ async def __generate_api_key__(ctx, name: str):
         changes = APIkeyManagement.genkey(name, apikeys)
         apikeys.update(changes["apikeys"])
         newkey = changes["newkey"]
-        saveconfigs(apikeys, files)
+        saveconfigs(apikeys, shortlinks, shortlinks) 
 
         embed = discord.Embed(title="API Key Generated", description="The API key was generated", colour=0x00ff00)
         embed.add_field(name="API Key", value=newkey)
@@ -410,7 +567,7 @@ async def __revoke_api_key__(ctx, key: str):
     try:
         changes = APIkeyManagement.revokekey(key, apikeys)
         apikeys.update(changes)
-        saveconfigs(apikeys, files)
+        saveconfigs(apikeys, shortlinks, shortlinks) 
 
         embed = discord.Embed(title="API Key Revoked", description="", colour=0x00ff00)
         embed.set_footer(text="ImageUploader developed by sniff122/Lewis L. Foster")

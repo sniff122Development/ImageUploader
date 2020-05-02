@@ -11,3 +11,6 @@ ImageUploader/ImageUploader.pyproj
 .vs/ImageUploader/config/applicationhost.config
 .vs/ImageUploader/v16/.suo
 .vscode/launch.json
+ImageUploader.code-workspace
+__pycache__/APIkeyManagement.cpython-38.pyc
+__pycache__/DiscordObjects.cpython-38.pyc

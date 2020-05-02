@@ -20,418 +20,48 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
     <style>
-        .alert {
-            padding: 20px;
-            background-color: white;
-            color: black;
-            height: 30px;
-        }
-
+        
+        
         .maincontent {
-            position: fixed;
-            top: 50px;
+            position: absolute;
+            top: 0;
             bottom: 0;
             left: 0;
             right: 0;
-            width: auto;
-            height:fit-content;
+            width: 100vh;
+            max-height: 100vh;
             margin: auto;
+            margin-top: 50px;
+        }
+
+        .messagebar {
+            height: 40px;
+
         }
     </style>
 </head>
 <body style="background-color: black; color: white">
     
     <script>
-        function requestUpload() {
-            var msgbar = document.getElementById("messagebar");
-            var alertdiv = document.createElement("div");
-            alertdiv.classList.add("alert");
-            alertdiv.classList.add("alert-info");
-            var par = document.createElement("p");
-            par.innerHTML = "<strong>Please Wait!</strong> Uploading your file"
-            alertdiv.appendChild(par);
-            msgbar.appendChild(alertdiv);
-
-            var form = document.getElementById("upload-form");
-            var apikey = document.getElementById("Authorization").value;
-            var username = document.getElementById("username").value;
-            var password = document.getElementById("password").value;
-            var FileName = document.getElementById("FileName").value;
-            const apiendpoint = "{{uploadapi}}"
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", apiendpoint);
-            xhr.setRequestHeader("username", username);
-            xhr.setRequestHeader("password", password);
-            xhr.setRequestHeader("Auth", apikey);
-            xhr.setRequestHeader('FileName', FileName)
-            var data = new FormData(form);
-            xhr.onload = function () {
-                var resp = JSON.parse(this.responseText);
-                if (resp["Status"] == 401) {
-                    $(".alert").alert('close');
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-danger");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Unauthorized!</strong> You are not authorized to do that!"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                } else if (resp["Status"] == 200) {
-                    var uploadurl = resp["FileLink"]
-
-                    $(".alert").alert('close');
-
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-info");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Done!</strong> Redirecting you to the file link"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                    setTimeout(function () { document.location.replace(uploadurl); }, 2000);
-                } else {
-                    $(".alert").alert('close');
-
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-danger");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Warning!</strong> An error occured, got code " + resp["Status"] + " from server!   "
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                }
-            }
-            xhr.send(data);
-        }
-
-        function requestDelete() {
-            var msgbar = document.getElementById("messagebar");
-            var alertdiv = document.createElement("div");
-            alertdiv.classList.add("alert");
-            alertdiv.classList.add("alert-info");
-            var par = document.createElement("p");
-            par.innerHTML = "<strong>Please Wait!</strong> Deleting file"
-            alertdiv.appendChild(par);
-            msgbar.appendChild(alertdiv);
-
-            var form = document.getElementById("delete-form");
-            var apikey = document.getElementById("Authorizationdel").value;
-            var username = document.getElementById("username").value;
-            var password = document.getElementById("password").value;
-            var FileName = document.getElementById("FileNamedel").value;
-            const apiendpoint = "{{deleteapi}}"
-            var xhr = new XMLHttpRequest();
-            xhr.open("DELETE", apiendpoint);
-            xhr.setRequestHeader("username", username);
-            xhr.setRequestHeader("password", password);
-            xhr.setRequestHeader("Auth", apikey);
-            xhr.setRequestHeader('FileName', FileName)
-            var data = new FormData(form);
-            xhr.onload = function () {
-                var resp = JSON.parse(this.responseText);
-                if (resp["Status"] == 401) {
-                    $(".alert").alert('close');
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-danger");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Unauthorized!</strong> You are not authorized to do that!"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                } else if (resp["Status"] == 200) {
-                    $(".alert").alert('close');
-
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-info");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Done!</strong>"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                } else {
-                    $(".alert").alert('close');
-
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-danger");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Warning!</strong> An error occured, got code " + resp["Status"] + " from server!"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                }
-            }
-            xhr.send(data);
-        }
-
-        function requestRename() {
-            var msgbar = document.getElementById("messagebar");
-            var alertdiv = document.createElement("div");
-            alertdiv.classList.add("alert");
-            alertdiv.classList.add("alert-info");
-            var par = document.createElement("p");
-            par.innerHTML = "<strong>Please Wait!</strong> Renaming file"
-            alertdiv.appendChild(par);
-            msgbar.appendChild(alertdiv);
-
-            var form = document.getElementById("rename-form");
-            var apikey = document.getElementById("Authorizationren").value;
-            var username = document.getElementById("username").value;
-            var password = document.getElementById("password").value;
-            var oldFileName = document.getElementById("oldFileNameren").value;
-            var newFileName = document.getElementById("newFileNameren").value;
-            const apiendpoint = "{{renameapi}}"
-            var xhr = new XMLHttpRequest();
-            xhr.open("PUT", apiendpoint);
-            xhr.setRequestHeader("username", username);
-            xhr.setRequestHeader("password", password);
-            xhr.setRequestHeader("Auth", apikey);
-            xhr.setRequestHeader('oldfilename', oldFileName);
-            xhr.setRequestHeader('newfilename', newFileName);
-            var data = new FormData(form);
-            xhr.onload = function () {
-                var resp = JSON.parse(this.responseText);
-                if (resp["Status"] == 401) {
-                    $(".alert").alert('close');
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-danger");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Unauthorized!</strong> You are not authorized to do that!"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                } else if (resp["Status"] == 200) {
-                    $(".alert").alert('close');
-
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-info");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Done!</strong>"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                } else {
-                    $(".alert").alert('close');
-
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-danger");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Warning!</strong> An error occured, got code " + resp["Status"] + " from server!"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                }
-            }
-            xhr.send(data);
-        }
-
-        function loadFiles() {
-            var msgbar = document.getElementById("messagebar");
-            var alertdiv = document.createElement("div");
-            alertdiv.classList.add("alert");
-            alertdiv.classList.add("alert-info");
-            var par = document.createElement("p");
-            par.innerHTML = "<strong>Please Wait!</strong> Loading files"
-            alertdiv.appendChild(par);
-            msgbar.appendChild(alertdiv);
-
-            var form = document.getElementById("rename-form");
-            var apikey = document.getElementById("Authorizationren").value;
-            var username = document.getElementById("username").value;
-            var password = document.getElementById("password").value;
-            const apiendpoint = "{{filelistapi}}"
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", apiendpoint);
-            xhr.setRequestHeader("username", username);
-            xhr.setRequestHeader("password", password);
-            xhr.setRequestHeader("Auth", apikey);
-            var data = new FormData(form);
-            xhr.onload = function () {
-                var resp = JSON.parse(this.responseText);
-                if (resp["Status"] == 401) {
-                    $(".alert").alert('close');
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-danger");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Unauthorized!</strong> You are not authorized to do that!"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                } else if (resp["Status"] == 200) {
-                    $(".alert").alert('close');
-
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-info");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Done!</strong>"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-
-                    var selectfiles = document.getElementById("files")
-
-                    resp["files"].forEach(function (file) {
-                        var selector = document.createElement("option");
-                        selector.innerHTML = file;
-                        selector.value = file;
-                        selectfiles.appendChild(selector)
-                    });
-                } else {
-                    $(".alert").alert('close');
-
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-danger");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Warning!</strong> An error occured, got code " + resp["Status"] + " from server!"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                }
-            }
-            xhr.send(data);
-        }
-
-        function genAPIkey() {
-            var msgbar = document.getElementById("messagebar");
-            var alertdiv = document.createElement("div");
-            alertdiv.classList.add("alert");
-            alertdiv.classList.add("alert-info");
-            var par = document.createElement("p");
-            par.innerHTML = "<strong>Please Wait!</strong> Generating new API key"
-            alertdiv.appendChild(par);
-            msgbar.appendChild(alertdiv);
-
-            var form = document.getElementById("apigen-form");
-            var username = document.getElementById("username").value;
-            var password = document.getElementById("password").value;
-            var name = document.getElementById("apigenname").value;
-            const apiendpoint = "{{apigenkey}}"
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", apiendpoint);
-            xhr.setRequestHeader("username", username);
-            xhr.setRequestHeader("password", password);
-            xhr.setRequestHeader("name", name)
-            var data = new FormData(form);
-            xhr.onload = function () {
-                var resp = JSON.parse(this.responseText);
-                if (resp["Status"] == 401) {
-                    $(".alert").alert('close');
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-danger");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Unauthorized!</strong> You are not authorized to do that!"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                } else if (resp["Status"] == 200) {
-                    $(".alert").alert('close');
-
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-info");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Done!</strong> API Key: " + resp["newkey"]
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                } else {
-                    $(".alert").alert('close');
-
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-danger");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Warning!</strong> An error occured, got code " + resp["Status"] + " from server!"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                }
-            }
-            xhr.send(data);
-        }
-
-        function revokeAPIkey() {
-            var msgbar = document.getElementById("messagebar");
-            var alertdiv = document.createElement("div");
-            alertdiv.classList.add("alert");
-            alertdiv.classList.add("alert-info");
-            var par = document.createElement("p");
-            par.innerHTML = "<strong>Please Wait!</strong> Revoking API key"
-            alertdiv.appendChild(par);
-            msgbar.appendChild(alertdiv);
-
-            var form = document.getElementById("apirevoke-form");
-            var username = document.getElementById("username").value;
-            var password = document.getElementById("password").value;
-            var key = document.getElementById("apirevokekey").value;
-            const apiendpoint = "{{apirevokeapi}}"
-            var xhr = new XMLHttpRequest();
-            xhr.open("DELETE", apiendpoint);
-            xhr.setRequestHeader("username", username);
-            xhr.setRequestHeader("password", password);
-            xhr.setRequestHeader("key", key)
-            var data = new FormData(form);
-            xhr.onload = function () {
-                var resp = JSON.parse(this.responseText);
-                if (resp["Status"] == 401) {
-                    $(".alert").alert('close');
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-danger");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Unauthorized!</strong> You are not authorized to do that!"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                } else if (resp["Status"] == 200) {
-                    $(".alert").alert('close');
-
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-info");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Done!</strong> API key revoked!"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                } else {
-                    $(".alert").alert('close');
-
-                    var msgbar = document.getElementById("messagebar");
-                    var alertdiv = document.createElement("div");
-                    alertdiv.classList.add("alert");
-                    alertdiv.classList.add("alert-danger");
-                    var par = document.createElement("p");
-                    par.innerHTML = "<strong>Warning!</strong> An error occured, got code " + resp["Status"] + " from server!"
-                    alertdiv.appendChild(par);
-                    msgbar.appendChild(alertdiv);
-                }
-            }
-            xhr.send(data);
-        }
-
-        function fillInfo() {
+        function fillfileInfo() {
             var filename = document.getElementById('files').value
 
             document.getElementById("FileNamedel").value = filename
             document.getElementById("oldFileNameren").value = filename
         }
+        function filllinkInfo() {
+            var linkid = document.getElementById('links').value
+
+            document.getElementById("LinkDel").value = linkid
+            document.getElementById("oldlink").value = linkid
+        }
     </script>
+    <script src="/js/admin_files.js"></script>
+    <script src="/js/admin_links.js"></script>
+    <script src="/js/admin_keys.js"></script>
     
     <center>
-        <div id="messagebar">
+        <div id="messagebar" class="messagebar">
 
         </div>
         <div id="content" class="maincontent">
@@ -448,37 +78,42 @@
             <table>
                 <tr>
                     <td>
-                        <form enctype="multipart/form-data" action="" method="post" id="upload-form">
+                        <u><h1>Files</h1></u>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <form enctype="multipart/form-data" action="" method="post" id="file-upload-form">
                             <label>Upload File</label>
                             <br />
                             <label>API Key:</label>
-                            <input type="text" name="Authorization" id="Authorization">
+                            <input type="text" name="Authorizationupload" id="Authorizationupload">
                             <br />
                             <tabel>File Name</tabel>
                             <input type="text" name="FileName" id="FileName">
                             <br />
                             <input type="file" id="file" name="file">
                         </form>
-                        <button class="btn btn-outline-success" onclick="requestUpload()"><span>Upload</span></button>
+                        <button class="btn btn-outline-success" onclick="uploadFile()"><span>Upload</span></button>
                     </td>
                     <td>
-                        <form enctype="application/json" action="" method="delete" id="delete-form">
+                        <form enctype="application/json" action="" method="delete" id="file-delete-form">
                             <label>Delete File</label>
                             <br />
                             <label>API Key:</label>
-                            <input type="text" name="Authorizationdel" id="Authorizationdel">
+                            <input type="text" name="Authorizationfdel" id="Authorizationfdel">
                             <br />
                             <tabel>File Name</tabel>
                             <input type="text" name="FileNamedel" id="FileNamedel">
                         </form>
-                        <button class="btn btn-outline-danger" onclick="requestDelete()"><span>Delete</span></button>
+                        <button class="btn btn-outline-danger" onclick="deleteFile()"><span>Delete</span></button>
                     </td>
                     <td>
-                        <form enctype="application/json" action="" method="put" id="rename-form">
+                        <form enctype="application/json" action="" method="put" id="file-rename-form">
                             <label>Rename File</label>
                             <br />
                             <label>API Key:</label>
-                            <input type="text" name="Authorizationren" id="Authorizationren">
+                            <input type="text" name="Authorizationfren" id="Authorizationfren">
                             <br />
                             <tabel>Current File Name</tabel>
                             <input type="text" name="oldFileNameren" id="oldFileNameren">
@@ -486,12 +121,66 @@
                             <tabel>New File Name</tabel>
                             <input type="text" name="newFileNameren" id="newFileNameren">
                         </form>
-                        <button class="btn btn-outline-danger" onclick="requestRename()"><span>Rename</span></button>
+                        <button class="btn btn-outline-warning" onclick="renameFile()"><span>Rename</span></button>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <form enctype="application/json" action="" method="gets" id="apigen-form">
+                        <u><h1>Links</h1></u>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <form enctype="multipart/form-data" action="" method="post" id="shorten-form">
+                            <label>New Short Link</label>
+                            <br />
+                            <label>API Key:</label>
+                            <input type="text" name="Authorizationlnew" id="Authorizationlnew">
+                            <br />
+                            <label>Short Link ID</label>
+                            <input type="text" name="linkname" id="linkname">
+                            <br />
+                            <label>Redirect URL</label>
+                            <input type="text" id="linkurl" name="linkurl">
+                        </form>
+                        <button class="btn btn-outline-success" onclick="shortLink()"><span>Shorten</span></button>
+                    </td>
+                    <td>
+                        <form enctype="application/json" action="" method="delete" id="link-delete-form">
+                            <label>Delete Link</label>
+                            <br />
+                            <label>API Key:</label>
+                            <input type="text" name="Authorizationldel" id="Authorizationldel">
+                            <br />
+                            <tabel>Link ID</tabel>
+                            <input type="text" name="LinkDel" id="LinkDel">
+                        </form>
+                        <button class="btn btn-outline-danger" onclick="deleteLink()"><span>Delete</span></button>
+                    </td>
+                    <td>
+                        <form enctype="application/json" action="" method="put" id="rename-form">
+                            <label>Rename Link</label>
+                            <br />
+                            <label>API Key:</label>
+                            <input type="text" name="Authorizationlren" id="Authorizationlren">
+                            <br />
+                            <tabel>Current Link ID</tabel>
+                            <input type="text" name="oldlink" id="oldlink">
+                            <br />
+                            <tabel>New Link ID</tabel>
+                            <input type="text" name="newlink" id="newlink">
+                        </form>
+                        <button class="btn btn-outline-warning" onclick="renameLink()"><span>Rename</span></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <u><h1>API Keys</h1></u>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <form enctype="application/json" action="" method="get" id="apigen-form">
                             <label>Generate API Key</label>
                             <br />
                             <tabel>Name</tabel>
@@ -506,15 +195,25 @@
                             <tabel>API Key</tabel>
                             <input type="text" name="apiremokekey" id="apirevokekey">
                         </form>
-                        <button onclick="revokeAPIkey()"><span>Revoke Key</span></button>
+                        <button class="btn btn-outline-danger" onclick="revokeAPIkey()"><span>Revoke Key</span></button>
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        <button class="btn btn-success" onclick="loadFiles()"><span>Load Files</span></button>
+                        <label for="files">Files</label>
+                        <select id="files" onchange="fillfileInfo()">
+                            <option value=""></option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn btn-success" onclick="loadLinks()"><span>Load Links</span></button>
+                        <label for="links">Links</label>
+                        <select id="links" onchange="filllinkInfo()">
+                            <option value=""></option>
+                        </select>
+                    </td>
         </table>
-        <button class="btn btn-success" onclick="loadFiles()"><span>Load Files</span></button>
-        <label for="files">Files</label>
-        <select id="files" onchange="fillInfo()">
-            <option value=""></option>
-        </select>
         </div>
     </center>
 </body>
