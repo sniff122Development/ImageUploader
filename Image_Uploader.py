@@ -168,18 +168,18 @@ def upload_file():
                 embed = DiscordObjects.DiscordEmbed(title="New Image Uploaded", description="There is a new image!",
                                                     footer=DiscordObjects.EmbedFooter(""), colour=0xffffff,
                                                     image=DiscordObjects.EmbedImage(
-                                                        str(request.headers['Host'] + "/uploads/" + filename)),
+                                                        str("https://" + request.headers['Host'] + "/uploads/" + filename)),
                                                     author=DiscordObjects.EmbedAuthor("ImageUploader"), fields=[
-                        DiscordObjects.EmbedField(name="URL:", value=str(request.headers['Host'] + "/uploads/" + filename),
+                        DiscordObjects.EmbedField(name="URL:", value=str("https://" + request.headers['Host'] + "/uploads/" + filename),
                                                   inline=False)], thumbnail=DiscordObjects.EmbedImage(
-                        str(request.headers['Host'] + "/uploads/" + filename)))
+                        str("https://" + request.headers['Host'] + "/uploads/" + filename)))
                 webhookcontent = DiscordObjects.DiscordWebhookContent(username="ImageUploader",
                                                                       avatar_url=Config["bot"]["webhook"]["avatar_url"],
                                                                       tts=False, embed=[embed])
                 DiscordObjects.WebhookPost(Config["bot"]["webhook"]["url"], webhookcontent)
             global RecentFile
-            RecentFile = str(request.headers['Host'] + "/uploads/" + filename)
-            return jsonify({"Status": 200, "Message": "OK", "FileLink": str(request.headers['Host'] + "/uploads/" + filename)})
+            RecentFile = str("https://" + request.headers['Host'] + "/uploads/" + filename)
+            return jsonify({"Status": 200, "Message": "OK", "FileLink": str("https://" + request.headers['Host'] + "/uploads/" + filename)})
         else:
             return jsonify({"Status": 403, "Message": "Forbidden - No file provided"})
     else:
@@ -209,7 +209,7 @@ def shorten_link():
                     apikeys[apikey]["short-urls"] = [urlid]
                 shortlinks[urlid] = {"url": url, "key": apikey}
                 saveconfigs(apikeys, files, shortlinks)
-            return jsonify({"Status": 200, "Message": "OK", "shorturl": str(request.headers['Host'] + "/link/" + urlid)})
+            return jsonify({"Status": 200, "Message": "OK", "shorturl": str("https://" + request.headers['Host'] + "/link/" + urlid)})
         else:
             return jsonify({"Status": 403, "Message": "Forbidden - No url provided"})
     else:
@@ -297,18 +297,18 @@ def admin_upload_file():
                 embed = DiscordObjects.DiscordEmbed(title="New Image Uploaded", description="There is a new image!",
                                                     footer=DiscordObjects.EmbedFooter("There be a new image!"),
                                                     colour=0xffffff, image=DiscordObjects.EmbedImage(
-                        str(request.headers['Host'] + "/uploads/" + filename)), author=DiscordObjects.EmbedAuthor("ImageUploader"),
+                        str("https://" + request.headers['Host'] + "/uploads/" + filename)), author=DiscordObjects.EmbedAuthor("ImageUploader"),
                                                     fields=[DiscordObjects.EmbedField(name="URL:", value=str(
-                                                        request.headers['Host'] + "/uploads/" + filename), inline=False)],
+                                                        "https://" + request.headers['Host'] + "/uploads/" + filename), inline=False)],
                                                     thumbnail=DiscordObjects.EmbedImage(
-                                                        str(request.headers['Host'] + "/uploads/" + filename)))
+                                                        str("https://" + request.headers['Host'] + "/uploads/" + filename)))
                 webhookcontent = DiscordObjects.DiscordWebhookContent(username="ImageUploader",
                                                                       avatar_url=Config["bot"]["webhook"]["avatar_url"],
                                                                       tts=False, embed=[embed])
                 DiscordObjects.WebhookPost(Config["bot"]["webhook"]["url"], webhookcontent)
             global RecentFile
-            RecentFile = str(request.headers['Host'] + "/uploads/" + filename)
-            return jsonify({"Status": 200, "Message": "OK", "FileLink": str(request.headers['Host'] + "/uploads/" + filename)})
+            RecentFile = str("https://" + request.headers['Host'] + "/uploads/" + filename)
+            return jsonify({"Status": 200, "Message": "OK", "FileLink": str("https://" + request.headers['Host'] + "/uploads/" + filename)})
         else:
             return jsonify({"Status": 403, "Message": "Forbidden", "Extra Info": "No File Prodived"})
     else:
@@ -335,7 +335,7 @@ def admin_new_url():
                 shortlinks[request.headers.get("id")] = {"url": url, "key": apikey}
                 saveconfigs(apikeys, files, shortlinks)
                 return jsonify(
-                    {"Status": 200, "Message": "OK", "shorturl": str(request.headers['Host'] + "/link/" + request.headers.get("id"))})
+                    {"Status": 200, "Message": "OK", "shorturl": str("https://" + request.headers['Host'] + "/link/" + request.headers.get("id"))})
         else:
             return jsonify({"Status": 403, "Message": "Forbidden - No url provided"})
     else:
